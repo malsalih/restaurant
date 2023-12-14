@@ -19,7 +19,7 @@ class OrderResource extends JsonResource
             "id"=> $this->id,
             "category_id"=> $this->category_id,
             "customer"=> new CustomerResource($this->customer),
-            "price"=>new MenuItemResource($this->price),
+            // "price"=>new MenuItemResource($this->price),
 
             "name"=> new MenuItemResource($this->menu_item),
             "type"=> new OrderTypeResource($this->order_type),

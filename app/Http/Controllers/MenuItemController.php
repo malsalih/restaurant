@@ -10,6 +10,8 @@ use App\Models\Chef;
 use App\Models\MenuItem;
 use App\Http\Requests\StoreMenuItemRequest;
 use App\Http\Requests\UpdateMenuItemRequest;
+use Illuminate\Support\Carbon;
+use Vtiful\Kernel\Format;
 
 class MenuItemController extends Controller
 {
@@ -55,6 +57,7 @@ class MenuItemController extends Controller
     public function store(StoreMenuItemRequest $request)
     {
         //
+        // $time=$request->prep_time;
 
         $menuItem = new MenuItem();
         $menuItem->fill($request->except('image'));

@@ -18,10 +18,11 @@ return new class extends Migration
             $table->foreignId('category_id');
             $table->integer('price');
             $table->integer('discounted_price')->nullable();
+            $table->boolean('offer')->default(false);
             $table->string('image')->nullable();
             $table->string('details');
             $table->boolean('available');
-            $table->integer('prep_time');
+            $table->time('prep_time')->format('H:i');
             $table->timestamps();
         });
     }

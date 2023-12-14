@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('bills', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('customer_id');
             $table->foreignId('cashier_id');
             $table->integer('total_price');
             $table->integer('discount');
             $table->integer('final_price');
             $table->foreignId('order_type_id');
-            $table->foreignId('is_paid_id');
+            $table->foreignId('is_paid_id')->default(1);
             $table->timestamps();
         });
     }

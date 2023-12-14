@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BillController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\OrderController;
@@ -50,6 +51,8 @@ Route::group(['prefix' => 'menu', 'controller' => MenuItemController::class,/*'m
 Route::group(['prefix' => 'order', 'controller' => OrderController::class,/*'middleware' => 'auth:sanctum'*/], function() {
 
     Route::post("add","store");
+    Route::post("cancel/{bill_id}","cancel_order");
+
     Route::get("index","index");
 
 
@@ -59,6 +62,14 @@ Route::group(['prefix' => 'customer', 'controller' => CustomerController::class,
 
     Route::post("add","store");
     Route::get("index","index");
+
+
+});
+
+Route::group(['prefix' => 'bill', 'controller' => BillController::class,/*'middleware' => 'auth:sanctum'*/], function() {
+
+    Route::post("sd","store");
+    Route::get("search","search");
 
 
 });

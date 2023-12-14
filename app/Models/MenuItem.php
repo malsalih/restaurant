@@ -14,11 +14,13 @@ class MenuItem extends Model
         "category_id",
         "price",
         "discounted_price",
+        "offer",
         "image",
         "details",
         "available",
         "prep_time",
     ];
+    
 
     function getImageAttribute($image)
     {

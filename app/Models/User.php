@@ -62,4 +62,8 @@ class User extends Authenticatable
         // ->as(Test::class)
         ->withTimestamps();
     }
+
+    function bill(){
+        return $this->hasMany(Bill::class);
+    }
 }

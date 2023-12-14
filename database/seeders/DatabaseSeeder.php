@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             IsPaidSeeder::class,
+            MenuItemSeeder::class,
             DeskSeeder::class,
             OrderStatusSeeder::class,
             OrderTypeSeeder::class,

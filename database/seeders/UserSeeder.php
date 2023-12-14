@@ -23,6 +23,7 @@ class UserSeeder extends Seeder
             "user_type_id"=> 1,
             "workStart"=>"8:00",
             "workEnd"=>"14:00",
+            "isActive"=>1,
             "salary"=> "1000000",
         ]);
 

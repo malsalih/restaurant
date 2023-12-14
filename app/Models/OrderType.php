@@ -12,4 +12,9 @@ class OrderType extends Model
     function order(){
         return $this->hasMany(Order::class);
     }
+
+    function bill(){
+        return $this->hasMany(Bill::class);
+    }
+    
 }

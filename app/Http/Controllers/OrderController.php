@@ -9,6 +9,8 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Models\User;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
@@ -57,6 +59,12 @@ class OrderController extends Controller
         foreach  ($orderIds as $item_id) {
 
             $menu_item= MenuItem::find($item_id);
+
+            if ($menu_item->available !==1) {
+                $bill->delete();
+                return $menu_item->name. " " ."غير متوفر حاليا" ;
+            }
+
             $order=new Order();
             
             $order->fill([
@@ -74,21 +82,46 @@ class OrderController extends Controller
             $order->save();
         }
 
+        //calculate prices and discount
+
         $total_price=Order::with('menu_item.price')
         ->join('menu_items','menu_item_id','=','menu_items.id')
         ->where('bill_id',$bill->id)
         ->sum('price');
+
+        $no_discount_price=Order::with('menu_item.price')
+        ->join('menu_items','menu_item_id','=','menu_items.id')
+        ->where('bill_id',$bill->id)
+        ->where('menu_items.offer',0)
+        ->sum('price');
         
+        $discount_price=Order::with('menu_item.price')
+        ->join('menu_items','menu_item_id','=','menu_items.id')
+        ->where('bill_id',$bill->id)
+        ->where('menu_items.offer',1)
+        ->sum('discounted_price');
+
+        $final_price=$no_discount_price + $discount_price;
+        $discount_precentage=$total_price-$final_price;
+    
         
 
-        
+        $cashier=User::where('user_type_id',3)
+        ->whereTime('workStart','<=',$bill->created_at->format('H:i:s'))
+        ->whereTime('workEnd','>=',$bill->created_at->format('H:i:s'))
+
+        ->first();
 
         
        // dd($total_price);
 
         $bill->update([
-            'cashier_id'=> $request->cashier_id,
+            'customer_id'=>$request->customer_id,
+            'cashier_id'=> $cashier->id,
             'total_price'=> $total_price,
+            'discount'=> (float)$discount_precentage,
+            'final_price'=>$final_price,
+            'order_type_id'=>$order->order_type_id,
         ]);
         $bill->save();
 
@@ -131,8 +164,13 @@ class OrderController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Order $order)
+    public function cancel_order($id)
     {
         //
+        Bill::where('id',$id)->update(['is_paid_id'=>3]);
+        Order::where('bill_id',$id)->update([
+            'order_status_id'=>3,
+            ]);
+
     }
 }
