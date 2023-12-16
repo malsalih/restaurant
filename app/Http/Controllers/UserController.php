@@ -27,11 +27,12 @@ class UserController extends Controller
     }
 
     public function create(StoreUserRequest $request){
+        if(Auth()->user()->can('create', User::class)){
+
         $user = User::create($request->except('category_id'));
 
-        // if(Auth()->user()->can('create', User::class)){
 
-        $request->user_type_id == 4|| $request->user_type_id==5 ? Chef::create([
+        $request->user_type_id == 4 ? Chef::create([
             'chef' => $user->name,
             'category_id'=> $request->category_id,
 
@@ -39,31 +40,33 @@ class UserController extends Controller
 
 
         return $user;
-        // }
-    //    return 'unauthinticated';
-       // dd(Auth::user()->email);
-
-
+        }
+       return 'unauthinticated';
         
     }
 
-    function login(LoginRequest $request){
-        $user = User::where('email', $request->email)->first();
+    function update($id){
+        $user = User::findOrFail($id);
+    }
 
-        $check_active=$user->isActive==true?1:0;
+    function login(LoginRequest $request){
+        $user = User::where('email', $request->email)
+        ->first();
 
         if (!$user || !Hash::check($request->password, $user->password  )) {
-           
-            return (
-              'The provided credentials are incorrect.'
-            
-            );
+           return "The provided credentials are incorrect.";
         }
         
-        elseif($check_active== 0){
-            return(
-                'User is inactive'
-            );
+        elseif($user->isActive == 0){
+            return "User is inactive";
+
+        }
+
+        ($user->workStart<=now()->format('H:i:s') && $user->workEnd>=now()->format('H:i:s') || $user->user_type_id==1 )== true 
+        ? $error=0:$error=1;
+
+        if ($error==1) {
+            return "Outside work hours";
         }
 
         $token = $user->createToken($request->email)->plainTextToken;
@@ -73,8 +76,6 @@ class UserController extends Controller
             'AccessToken' => $token
         ]);
     }
-
-
 
     function active(int $id){
         $user = User::find( $id);

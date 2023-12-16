@@ -4,19 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
 
 class Order extends Model
 {
-    use HasFactory;
+    use HasApiTokens,HasFactory;
     protected $fillable = [
         'customer_id',
         'bill_id',
         'user_id',
         'category_id',
         'menu_item_id',
+        'item_count',
+        'price',
         'order_type_id',
         'desk_id',
         'order_status_id',
+        'done_by',
         'notes',
     ];
 

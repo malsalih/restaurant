@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('address');
             $table->foreignId('user_type_id');
+            $table->foreignId('category_id')->nullable();
             $table->boolean('isActive')->default(false);
             $table->time('workStart')->format('H:i');
             $table->time('workEnd')->format('H:i');

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BillController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\MailController;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\UserController;
@@ -23,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::post("login", [UserController::class,'login'])->name('login');
-
+Route::get('send-mail', [MailController::class,'sendMail'])->name('send.mail');
 
 Route::group(['prefix' => 'user', 'controller' => UserController::class,'middleware' => 'auth:sanctum'], function() {
 
@@ -36,12 +37,14 @@ Route::group(['prefix' => 'user', 'controller' => UserController::class,'middlew
 
 });
 
-Route::group(['prefix' => 'menu', 'controller' => MenuItemController::class,/*'middleware' => 'auth:sanctum'*/], function() {
+Route::group(['prefix' => 'menu', 'controller' => MenuItemController::class/*'middleware' => 'auth:sanctum'*/], function() {
 
     Route::post("add","store");
     Route::get("index","index");
     Route::post("update/{menu_item_id}","update");
     Route::get("delete/{menu_item_id}","destroy");
+    Route::middleware('auth:sanctum')->get("all_items","show_all");
+
 
 
 
@@ -50,10 +53,18 @@ Route::group(['prefix' => 'menu', 'controller' => MenuItemController::class,/*'m
 
 Route::group(['prefix' => 'order', 'controller' => OrderController::class,/*'middleware' => 'auth:sanctum'*/], function() {
 
-    Route::post("add","store");
+    Route::post("add/","store");
+    Route::post("prepaired/{order_id}","order_prepaired")->middleware("auth:sanctum");
+    Route::post("done/{order_id}","order_done")->middleware("auth:sanctum");
+
+
     Route::post("cancel/{bill_id}","cancel_order");
 
-    Route::get("index","index");
+    Route::get("index","index",);
+    Route::get("user_index","index_by_user",)->middleware("auth:sanctum");
+
+    Route::get("report","report");
+
 
 
 });

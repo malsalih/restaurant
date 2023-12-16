@@ -15,13 +15,17 @@ return new class extends Migration
             $table->id();
             $table->foreignId('bill_id');
             $table->foreignId('customer_id');
-            $table->foreignId('user_id');
+            $table->foreignId('user_id')->nullable();
             $table->foreignId('category_id');
             $table->foreignId('menu_item_id');
+            $table->integer('price');
+            $table->integer('item_count')->default(1);
             $table->foreignId('order_type_id');
-            $table->foreignId('desk_id');
+            $table->foreignId('desk_id')->nullable();
             $table->foreignId('order_status_id');
-            $table->string('notes');
+            $table->foreignId('prepaired_by')->nullable();
+            $table->foreignId('done_by')->nullable();
+            $table->string('notes')->nullable();
             $table->timestamps();
         });
     }

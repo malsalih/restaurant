@@ -16,11 +16,17 @@ class MenuItemResource extends JsonResource
     {
         return [
             "id"=> $this->id,
-            "price"=> $this->price,
             "name"=> $this->name,
+            "price"=> $this->price,
+            "discounted_price"=>$this->discounted_price,
+            "offer"=>$this->offer,
             "available"=>$this->available,
-            "image"=> asset($this->image),
+            "image"=> $this->image,
+            "details"=>$this->details,
+            "prep_time"=>$this->prep_time,
             "category"=>new CategoryResource($this->category),
+            "created_at"=>$this->created_at,
+            "updated_at"=>$this->updated_at,
         ];
     }
 }

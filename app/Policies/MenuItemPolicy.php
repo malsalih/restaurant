@@ -30,6 +30,7 @@ class MenuItemPolicy
     public function create(User $user): bool
     {
         //
+        
     }
 
     /**

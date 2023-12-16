@@ -22,6 +22,7 @@ class UserResource extends JsonResource
             'phone'=> $this->phone,
             'address'=> $this->address,
             'user_type'=> new UserTypeResource($this->userType),
+            'category'=> new CategoryResource($this->category),
             'isActive'=>$this->isActive,
             'workStart'=>$this->workStart,
             'workEnd'=> $this->workEnd,

@@ -19,7 +19,7 @@ class MenuItemSeeder extends Seeder
             "category_id"=>1,
             "price"=>18,
             "discounted_price"=>15,
-            "offer"=>0,
+            "offer"=>1,
             "details"=>"مندي يمني",
             "available"=>"1",
             "prep_time"=>"00:45",

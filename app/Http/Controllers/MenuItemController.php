@@ -34,7 +34,7 @@ class MenuItemController extends Controller
         // return (CategoryResource::collection($menuItems));
         
 
-        $items=MenuItem::selectRaw('categories.category ,menu_items.name as Item, menu_items.price as price,menu_items.image as Image')
+        $items=MenuItem::selectRaw('categories.category ,menu_items.id as ID,menu_items.name as Item, menu_items.price as price,menu_items.image as Image,menu_items.details as Details')
         // ->with("menu_item.category")
         // $items = MenuItem::all()
         ->where("available",true)
@@ -48,6 +48,11 @@ class MenuItemController extends Controller
         // return MenuItemResource::collection($items);
 
 
+    }
+
+    function show_all(){
+        $items=MenuItem::all();
+        return MenuItemResource::collection($items);
     }
 
 
