@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\MenuItemResource;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserTypeResource;
@@ -20,10 +21,8 @@ class UserController extends Controller
     //
     public function index(){
         $users = User::all();
-        // //dd(UserTypeResource::collection($users));
         return UserResource::collection($users);
-        // $menuItem=MenuItem::all();
-        // return MenuItemResource::collection($menuItem);
+
     }
 
     public function create(StoreUserRequest $request){
@@ -32,8 +31,8 @@ class UserController extends Controller
         $user = User::create($request->except('category_id'));
 
 
-        $request->user_type_id == 4 ? Chef::create([
-            'chef' => $user->name,
+        $request->user_type_id == 4 ? $user->update([
+            
             'category_id'=> $request->category_id,
 
             ]):0;  
@@ -45,8 +44,12 @@ class UserController extends Controller
         
     }
 
-    function update($id){
+    function update(UpdateUserRequest $request,$id){
+        if(Auth()->user()->can('update', User::class)){
+
         $user = User::findOrFail($id);
+        $user->update($request->only('category_id','name','email','password','phone','address','user_type_id','category_id','isActive','workStart','workEnd','salary',));
+        }
     }
 
     function login(LoginRequest $request){
@@ -85,10 +88,12 @@ class UserController extends Controller
     }
 
     function delete(int $id){
+        if(Auth()->user()->can('delete', User::class)){
         $user = User::find( $id);
         $user->update(
             ["isActive"=>false]
         );
+    }
     }
 
         

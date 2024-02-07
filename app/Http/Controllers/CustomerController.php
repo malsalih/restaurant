@@ -30,7 +30,7 @@ class CustomerController extends Controller
     public function store(StoreCustomerRequest $request)
     {
         //
-        $customer = Customer::create($request->all());
+        $customer = Customer::create($request->only('name','phone','address'));
     }
 
     /**
@@ -52,9 +52,11 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCustomerRequest $request, Customer $customer)
+    public function update(UpdateCustomerRequest $request, $id)
     {
         //
+        $customer = Customer::findOrFail($id);
+        $customer->update($request->only('name','phone','address'));
     }
 
     /**

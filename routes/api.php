@@ -4,6 +4,7 @@ use App\Http\Controllers\BillController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\MenuItemController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -24,7 +25,12 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 Route::post("login", [UserController::class,'login'])->name('login');
-Route::get('send-mail', [MailController::class,'sendMail'])->name('send.mail');
+
+Route::group(['prefix' => 'notifications', 'controller' => NotificationController::class,'middleware' => 'auth:sanctum'], function() {
+
+Route::get('unread','index');
+Route::post('mark/{notification_id}','mark_Notification');
+});
 
 Route::group(['prefix' => 'user', 'controller' => UserController::class,'middleware' => 'auth:sanctum'], function() {
 
@@ -32,17 +38,19 @@ Route::group(['prefix' => 'user', 'controller' => UserController::class,'middlew
     Route::get("index","index");
     Route::post("menu/add","store");
     Route::post("delete/{user_id}","delete");
+    Route::post("update/{user_id}","update");
+
     Route::post("active/{user_id}","active");
 
 
 });
 
-Route::group(['prefix' => 'menu', 'controller' => MenuItemController::class/*'middleware' => 'auth:sanctum'*/], function() {
+Route::group(['prefix' => 'menu', 'controller' => MenuItemController::class], function() {
 
     Route::post("add","store");
     Route::get("index","index");
     Route::post("update/{menu_item_id}","update");
-    Route::get("delete/{menu_item_id}","destroy");
+    Route::get("delete/{menu_item_id}","destroy")->middleware("auth:sanctum");
     Route::middleware('auth:sanctum')->get("all_items","show_all");
 
 
@@ -51,7 +59,7 @@ Route::group(['prefix' => 'menu', 'controller' => MenuItemController::class/*'mi
 
 });
 
-Route::group(['prefix' => 'order', 'controller' => OrderController::class,/*'middleware' => 'auth:sanctum'*/], function() {
+Route::group(['prefix' => 'order', 'controller' => OrderController::class], function() {
 
     Route::post("add/","store");
     Route::post("prepaired/{order_id}","order_prepaired")->middleware("auth:sanctum");
@@ -59,6 +67,8 @@ Route::group(['prefix' => 'order', 'controller' => OrderController::class,/*'mid
 
 
     Route::post("cancel/{bill_id}","cancel_order");
+    Route::post("delivery/{bill_id}","in_delivery")->middleware("auth:sanctum");
+
 
     Route::get("index","index",);
     Route::get("user_index","index_by_user",)->middleware("auth:sanctum");
@@ -69,9 +79,15 @@ Route::group(['prefix' => 'order', 'controller' => OrderController::class,/*'mid
 
 });
 
+Route::group(['controller' => NotificationController::class,'middleware' => 'auth:sanctum'], function() {
+Route::get('notification','index');
+});
+
 Route::group(['prefix' => 'customer', 'controller' => CustomerController::class,/*'middleware' => 'auth:sanctum'*/], function() {
 
     Route::post("add","store");
+    Route::post("update/{customer_id}","update");
+
     Route::get("index","index");
 
 
@@ -84,4 +100,5 @@ Route::group(['prefix' => 'bill', 'controller' => BillController::class,/*'middl
 
 
 });
+
 

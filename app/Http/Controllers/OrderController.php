@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OrderCanceled;
 use App\Http\Resources\MenuItemResource;
 use App\Http\Resources\OrderResource;
-use App\Mail\OrderReceived;
 use App\Models\Bill;
 use App\Models\MenuItem;
 use App\Models\Notification;
@@ -12,8 +12,11 @@ use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Models\User;
+use App\Listeners;
+use App\Events\OrderReceived;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
@@ -23,20 +26,24 @@ class OrderController extends Controller
      */
     public function index()
     {
-        //
-        // $menuItems = MenuItem::all();
-        // return (MenuItemResource::collection($menuItems));
+
         $menuItems = Order::with('menu_item.category','order_type')->get();
         return (OrderResource::collection($menuItems));
 
-        // return ($menuItems);
     }
 
-    public function index_by_user()
+    public function index_by_user(Request $request)
     {
+        $filters=[];
+        $request->filled('order_status_id') ? $filters []= ['order_status_id', '=', $request->order_status_id]: 0;
+        $request->filled('order_type_id') ? $filters []= ['order_type_id', '=', $request->order_type_id]: 0;
+
+
 
         $menuItems = Order::with('menu_item.category','order_type')
-        ->where('category_id',Auth::user()->category_id)->get();
+        ->where('category_id',Auth::user()->category_id)
+        ->where($filters)
+        ->get();
         return (OrderResource::collection($menuItems));
 
     }
@@ -70,7 +77,7 @@ class OrderController extends Controller
 
         foreach  ($itemIds as $item_id) {
             
-            $count=$request->item_count[$item_num];
+            $count=$request->item_count[$item_num]??$count=1;
 
             $menu_item= MenuItem::find($item_id);
 
@@ -91,7 +98,7 @@ class OrderController extends Controller
 
             $order=new Order();
             $request->order_type_id==1 ? $desk=$request->desk_id:$desk=null;
-            $order->fill([
+            event(new OrderReceived($order->fill([
                 'bill_id'=> $bill->id,
                 'customer_id'=>$request->customer_id,
                 'user_id'=>$user_id,
@@ -104,26 +111,8 @@ class OrderController extends Controller
                 'item_count'=>$count,
                 'category_id'=>$menu_item->category_id,
                 
-            ]);
+            ])));
             $order->save();
-
-            $user=User::where("category_id", $order->category_id)
-            ->whereTime('workStart','<=',$bill->created_at->format('H:i:s'))
-            ->whereTime('workEnd','>=',$bill->created_at->format('H:i:s'))
-            ->get();
-            foreach( $user as $user_id ) {
-                $chef_id=$user_id->id;
-                $notification=new Notification();
-                $notify=' تم طلب '.$menu_item->name.' عدد '.$count;
-
-                $notification->fill([
-                'order_id'=>$order->id,
-                'menu_item_id'=>$item_id,
-                'user_id'=>$chef_id,
-                'notification'=>$notify,
-                ]);
-            $notification->save();
-            }
 
             $item_num++;
 
@@ -140,13 +129,18 @@ class OrderController extends Controller
         ->whereTime('workStart','<=',$bill->created_at->format('H:i:s'))
         ->whereTime('workEnd','>=',$bill->created_at->format('H:i:s'))
         ->first();
+        
+
+        $prep_time=MenuItem::where('id',$order->menu_item_id)
+        ->max('prep_time');
 
         $bill->update([
             'customer_id'=>$request->customer_id,
-            'cashier_id'=> $cashier->id??null,
+            'user_id'=> $cashier->id??null,
             'total_price'=> $sum_normal_price,
             'discount'=> (float)$discount_percentage,
             'final_price'=>$total_price,
+            'preparation_time'=>$prep_time,
             'order_type_id'=>$order->order_type_id,
         ]);
         $bill->save();
@@ -161,7 +155,27 @@ class OrderController extends Controller
 
     function report(){
 
-        $total_orders=Bill::selectRaw('count(*) as Total,sum(is_paid_id=1) as pending,sum(is_paid_id=2) as done,sum(is_paid_id=3) as canceled')
+        $total_bills=Bill::selectRaw('count(*) as Total,sum(is_paid_id=1) as pending,sum(is_paid_id=2) as done,sum(is_paid_id=3) as canceled')
+        ->get();
+
+        $total_orders=Order::selectRaw('count(*) as Total,sum(order_status_id=1) as pending,sum(order_status_id=2) as in_delivery,sum(order_status_id=3) as canceled,sum(order_status_id=4) as Done')
+        ->get();
+        $top_customers=Order::select('customer_id','customers.name as name')
+        ->selectRaw('count(*) as count')
+        ->join('customers','customer_id','=','customers.id')
+        ->where("order_status_id",4)
+        ->groupBy('customer_id')
+        ->orderBy('count','desc')
+        ->limit(5)
+        ->get();
+
+        $top_chefs=Order::select('done_by','users.name as name')
+        ->selectRaw('count(*) as count')
+        ->join('users','done_by','=','users.id')
+        ->where("order_status_id",4)
+        ->groupBy('done_by')
+        ->orderBy('count','desc')
+        ->limit(5)
         ->get();
 
         $favorite_item=Order::select('menu_item_id','menu_items.name as food')
@@ -170,58 +184,57 @@ class OrderController extends Controller
         ->where('order_status_id',4)
         ->groupBy('menu_item_id')
         ->orderBy('count','desc')
-        ->limit(5)
-        
+        ->limit(10)    
         ->get();
+
         return [
+            'total_bills'=>$total_bills,
             'total_orders'=>$total_orders,
+            'top_chefs'=>$top_chefs,
+            'top_customers'=>$top_customers,
             'top_foods'=>$favorite_item,
         ];
 
 
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Order $order)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Order $order)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateOrderRequest $request, Order $order)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-
     function order_prepaired($id){
-        Order::where('id',$id)->update([
+        $order=Order::where('id',$id);
+        $order->update([
             "prepaired_by"=>Auth::id(),
         ]);
 
     }
     function order_done($id){
         $order=Order::find($id);
+        if($order->order_status_id==4){
+            return 'already done';
+        }else if($order->order_status_id== 3){
+            return 'its a canceled order';
+        }
         $order->update([
             'done_by'=>Auth::id(),
             'order_status_id'=>4,
 
         ]);
+        return 'order is done';
+    }
+
+    function in_delivery($id){
+        
+        $orders=Order::where('bill_id',$id)->get();
+        foreach($orders as $order){
+
+        if($order->order_type_id==1){
+            return "this is not delivery type order";
+        }
+        $order->update([
+            'done_by'=>Auth::id(),
+            'order_status_id'=>2,
+
+        ]);
+        return "your order is on its way";
+    }
     }
     public function cancel_order($id)
     {
@@ -232,7 +245,8 @@ class OrderController extends Controller
         
         foreach ($orders as $order){
 
-        
+
+            event(new OrderCanceled($order));
             $order->update([
                 'order_status_id'=>3,
             ]);
@@ -241,19 +255,8 @@ class OrderController extends Controller
             // ->whereTime('workStart','<=',$bill->created_at->format('H:i:s'))
             // ->whereTime('workEnd','>=',$bill->created_at->format('H:i:s'))
             ->get();
-            foreach( $user as $user_id ) {
-                $chef_id=$user_id->id;
-                $notification=new Notification();
-                $notify=' تم الغاء طلب '.$menu_item->name;
-
-                $notification->fill([
-                'order_id'=>$order->id,
-                'menu_item_id'=>$order->menu_item_id,
-                'user_id'=>$chef_id,
-                'notification'=>$notify,
-                ]);
-            $notification->save();
-            }
+            
+            
 
         }
     }

@@ -18,7 +18,7 @@ class OrderResource extends JsonResource
         return [
             "id"=> $this->id,
             "category_id"=> $this->category_id,
-            "user_id"=> $this->user_id,
+            // "user_id"=> new UserResource($this->user->setAttribute('just_name',true)),
             "customer"=> new CustomerResource($this->customer),
             // "price"=>new MenuItemResource($this->price),
 

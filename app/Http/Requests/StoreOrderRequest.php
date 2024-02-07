@@ -23,6 +23,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             //
+            "itemIds"=>'exists:menu_items,id',
 
         ];
     }

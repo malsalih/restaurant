@@ -53,7 +53,32 @@ class UserSeeder extends Seeder
             "salary"=> "1000000",
         ]);
 
-        User::factory()->count(10)->create();
+        User::create([
+            "name"=> "salih",
+            "phone"=>"07703988345",
+            "email"=> "salih@gmail.com",
+            "address"=>"karbala",
+            "password"=> bcrypt("password"),
+            "user_type_id"=> 3,
+            "workStart"=>"00:00",
+            "workEnd"=>"12:00",
+            "isActive"=>1,
+            "salary"=> "1000000",
+        ]);
+        User::create([
+            "name"=> "haider",
+            "phone"=>"07703988345",
+            "email"=> "salih@gmail.com",
+            "address"=>"karbala",
+            "password"=> bcrypt("password"),
+            "user_type_id"=> 3,
+            "workStart"=>"12:00",
+            "workEnd"=>"23:59",
+            "isActive"=>1,
+            "salary"=> "1000000",
+        ]);
+
+        User::factory()->count(15)->create();
 
             
 

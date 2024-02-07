@@ -15,6 +15,26 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        
+            return ($this->nameReturn($request) ?? $this->fullReturn($request));
+
+
+        
+
+    }
+    public function nameReturn($request)
+    {
+        if ($this->just_name) {
+            return [
+                'id' => $this->id,
+                'name'=> $this->name,
+            ];
+        }
+        return null;
+    }
+
+    public function fullReturn($request)
+    {
         return [
             "id"=> $this->id,
             "name"=> $this->name,
@@ -27,7 +47,6 @@ class UserResource extends JsonResource
             'workStart'=>$this->workStart,
             'workEnd'=> $this->workEnd,
             'salary'=>$this->salary,
-
         ];
     }
 

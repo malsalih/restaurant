@@ -11,4 +11,8 @@ class IsPaid extends Model
     protected $fillable = [
         "state",
     ];
+
+    function bill(){
+        return $this->hasMany(IsPaid::class);
+    }
 }

@@ -30,24 +30,27 @@ class UserPolicy
     public function create(User $user): bool
     {
         //
-        // return Auth::id() === 1;
+        return Auth::id() === 1;
         
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, User $model): bool
+    public function update(User $user): bool
     {
         //
+        return Auth::id() === 1;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, User $model): bool
+    public function delete(User $user): bool
     {
         //
+        return Auth::id() === 1;
+
     }
 
     /**

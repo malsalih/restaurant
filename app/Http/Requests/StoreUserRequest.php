@@ -23,6 +23,15 @@ class StoreUserRequest extends FormRequest
     {
         return [
             //
+            'name'=>'required|string',
+            'email'=>'required|email|unique:users,email',
+            'phone'=>'string|starts_with:7,07,964,00964,+964|unique:users,phone',
+            'address'=>'string',
+            'user_type_id'=>'exists:user_types,id',
+            'category_id'=>'exists:categories,id',
+            'isActive'=>'in:0,1',
+            
+            'salary'=>'integer',
             
         ];
     }

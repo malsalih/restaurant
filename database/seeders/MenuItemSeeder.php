@@ -70,5 +70,6 @@ class MenuItemSeeder extends Seeder
             "available"=>1,
             "prep_time"=>'00:25',
         ]);
+        MenuItem::factory()->count(20)->create();
     }
 }

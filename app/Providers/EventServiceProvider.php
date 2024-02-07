@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Events\OrderCanceled;
+use App\Listeners\SendOrderCanceledNotification;
+use App\Listeners\SendOrderReceivedNotification;
 use Illuminate\Auth\Events\Registered;
+use App\Events\OrderReceived;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
@@ -18,6 +22,15 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+
+        OrderReceived::class => [
+            SendOrderReceivedNotification::class,
+
+        ],
+        OrderCanceled::class => [
+            SendOrderCanceledNotification::class,
+            ],
+
     ];
 
     /**

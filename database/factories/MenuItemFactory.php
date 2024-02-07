@@ -17,7 +17,16 @@ class MenuItemFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+                        
+                "name"=>fake()->text(10),
+                "category_id"=>rand(1,6),
+                "price"=>rand(2,25),
+                "discounted_price"=>rand(2,15),
+                "offer"=>rand(0,1),
+                "details"=>fake()->text(),
+                "available"=>rand(0,1),
+                "prep_time"=>fake()->time( 'H:i:s' ,'00:45:00'),
+    
         ];
     }
 }

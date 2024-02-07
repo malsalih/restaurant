@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('bill_id');
             $table->foreignId('customer_id');
-            $table->foreignId('user_id')->nullable();
             $table->foreignId('category_id');
             $table->foreignId('menu_item_id');
             $table->integer('price');

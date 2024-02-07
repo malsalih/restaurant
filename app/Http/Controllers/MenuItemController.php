@@ -11,6 +11,7 @@ use App\Models\MenuItem;
 use App\Http\Requests\StoreMenuItemRequest;
 use App\Http\Requests\UpdateMenuItemRequest;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Vtiful\Kernel\Format;
 
 class MenuItemController extends Controller
@@ -20,32 +21,15 @@ class MenuItemController extends Controller
      */
     public function index()
     {
-        //
-        // $menuItems = MenuItem::with("order.menu_item.category")
-        // ->where('available',true)
-        // ->get()
-        
-        // ->groupBy('menu_items.category_id');
-        // ->toArray();
-
-        // return (MenuItemResource::collection($menuItems));
-        // return (MenuItemResource::collection($menuItems));
-        // return (ChefResource::collection($menuItems));
-        // return (CategoryResource::collection($menuItems));
         
 
         $items=MenuItem::selectRaw('categories.category ,menu_items.id as ID,menu_items.name as Item, menu_items.price as price,menu_items.image as Image,menu_items.details as Details')
-        // ->with("menu_item.category")
-        // $items = MenuItem::all()
         ->where("available",true)
         ->join('categories','category_id','=','categories.id')
         ->get()
         ->groupBy("category");
 
         return ([$items]);
-
-        // $items = MenuItem::all()->groupBy('categories.category');
-        // return MenuItemResource::collection($items);
 
 
     }
@@ -119,10 +103,12 @@ class MenuItemController extends Controller
     public function destroy($id)
     {
         //
+        
         $menuItem=MenuItem::findOrFail($id);
         $imagePath=$menuItem->image;
+        $fullPath=public_path('uploads/items/'). basename($imagePath);
 
-        $menuItem->image !=null ? unlink(public_path('uploads/items/'). basename($imagePath)):0;
+        $menuItem->image !=null && file_exists($fullPath) ? unlink($fullPath):0;
 
         $menuItem->delete();
 

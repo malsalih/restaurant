@@ -24,6 +24,7 @@ class User extends Authenticatable
         'phone',
         'address',
         'user_type_id',
+        'category_id',
         'isActive',
         'workStart',
         'workEnd',
@@ -54,14 +55,6 @@ class User extends Authenticatable
         return $this->belongsTo(UserType::class);
     }
 
-    function chef()
-    {
-        return $this->belongsToMany(User::class, 'chefs')
-        ->withPivot('id', 'user_id','category_id')
-        
-        // ->as(Test::class)
-        ->withTimestamps();
-    }
 
     function bill(){
         return $this->hasMany(Bill::class);
@@ -69,5 +62,9 @@ class User extends Authenticatable
 
     function category(){
         return $this->belongsTo(Category::class);
+    }
+
+    function order(){
+        return $this->hasMany(Order::class);
     }
 }

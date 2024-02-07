@@ -4,15 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class Order extends Model
 {
-    use HasApiTokens,HasFactory;
+    use HasApiTokens,HasFactory,Notifiable;
     protected $fillable = [
         'customer_id',
         'bill_id',
-        'user_id',
         'category_id',
         'menu_item_id',
         'item_count',
@@ -49,6 +49,10 @@ class Order extends Model
 
     function bill(){
         return $this->hasMany(Bill::class);
+    }
+
+    function user(){
+        return $this->belongsTo(User::class);
     }
 
 
