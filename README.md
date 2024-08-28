@@ -8,5 +8,5 @@
 </p>
 
 ## About Project
-Restaurant Management API
+## Restaurant Management API
 
